@@ -50,7 +50,7 @@ class Training:
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
         return InfoMessage(
-            type(self).__name__,
+            self.__class__.__name__,
             self.duration,
             self.get_distance(),
             self.get_mean_speed(),
@@ -67,9 +67,11 @@ class Running(Training):
 
     def get_spent_calories(self) -> float:
         return (
-            (self.CALORIES_MEAN_SPEED_MULTIPLIER
+            (
+                self.CALORIES_MEAN_SPEED_MULTIPLIER
                 * self.get_mean_speed()
-                + self.CALORIES_MEAN_SPEED_SHIFT)
+                + self.CALORIES_MEAN_SPEED_SHIFT
+            )
             * self.weight
             / self.M_IN_KM
             * self.duration
@@ -84,18 +86,26 @@ class SportsWalking(Training):
 
     WEIGHT_MULTIPLIER_1 = 0.035
     WEIGHT_MULTIPLIER_2 = 0.029
-    KMH_TO_MPS_MULTIPLIER = 0.278
-    SENTIMETERS_IN_METER = 100
+    KMH_TO_MPS = 0.278
+    SM_IN_M = 100
 
     def get_spent_calories(self) -> float:
         return (
-            (self.WEIGHT_MULTIPLIER_1 * self.weight
-                + ((self.get_mean_speed()
-                    * self.KMH_TO_MPS_MULTIPLIER) ** 2
+            (
+                self.WEIGHT_MULTIPLIER_1
+                * self.weight
+                + (
+                    (
+                        self.get_mean_speed()
+                        * self.KMH_TO_MPS
+                    )
+                    ** 2
                     / (self.height
-                        / self.SENTIMETERS_IN_METER))
+                        / self.SM_IN_M)
+                )
                 * self.WEIGHT_MULTIPLIER_2
-                * self.weight)
+                * self.weight
+            )
             * (self.duration * self.MIN_IN_HOUR)
         )
 
@@ -138,7 +148,7 @@ WORKOUT_LEN_ERROR = ('Неверное число аргументов трен�
                      'Получено {}, ожидается {}')
 
 
-def read_package(workout_type: str, data: list) -> Training:
+def read_package(workout_type: str, data: list[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
     if workout_type not in TRAINING_DATA:
         raise ValueError(WORKOUT_TYPE_ERROR.format(workout_type))
@@ -166,5 +176,4 @@ if __name__ == '__main__':
     ]
 
     for workout_type, data in packages:
-        training = read_package(workout_type, data)
-        main(training)
+        main(read_package(workout_type, data))
