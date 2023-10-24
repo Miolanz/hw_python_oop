@@ -98,7 +98,8 @@ class SportsWalking(Training):
                     (
                         self.get_mean_speed()
                         * self.KMH_TO_MS
-                    ) ** 2
+                    )
+                    ** 2
                     / (
                         self.height
                         / self.SM_IN_M
