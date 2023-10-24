@@ -86,7 +86,7 @@ class SportsWalking(Training):
 
     WEIGHT_MULTIPLIER_1 = 0.035
     WEIGHT_MULTIPLIER_2 = 0.029
-    KMH_TO_MPS = 0.278
+    KMH_TO_MS = 0.278
     SM_IN_M = 100
 
     def get_spent_calories(self) -> float:
@@ -97,11 +97,12 @@ class SportsWalking(Training):
                 + (
                     (
                         self.get_mean_speed()
-                        * self.KMH_TO_MPS
+                        * self.KMH_TO_MS
+                    ) ** 2
+                    / (
+                        self.height
+                        / self.SM_IN_M
                     )
-                    ** 2
-                    / (self.height
-                        / self.SM_IN_M)
                 )
                 * self.WEIGHT_MULTIPLIER_2
                 * self.weight
@@ -152,14 +153,15 @@ def read_package(workout_type: str, data: list[int]) -> Training:
     """Прочитать данные полученные от датчиков."""
     if workout_type not in TRAINING_DATA:
         raise ValueError(WORKOUT_TYPE_ERROR.format(workout_type))
-    if TRAINING_DATA[workout_type][1] != len(data):
-        raise ValueError(
-            WORKOUT_LEN_ERROR.format(
-                workout_type,
-                len(data),
-                TRAINING_DATA[workout_type][1]
+    for code, info in TRAINING_DATA.items():
+        if code == workout_type and info[1] != len(data):
+            raise ValueError(
+                WORKOUT_LEN_ERROR.format(
+                    workout_type,
+                    len(data),
+                    info[1]
+                )
             )
-        )
     return TRAINING_DATA[workout_type][0](*data)
 
 
